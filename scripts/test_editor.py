@@ -1,5 +1,7 @@
 """Offline smoke tests for original video-editing commands."""
 import json
+import importlib.util
+import os
 import subprocess
 import sys
 import tempfile
@@ -56,6 +58,53 @@ class EditorTests(unittest.TestCase):
     def test_invalid_speed(self):
         r = cmd(HERE / "advanced_editor.py", "speed", "--input", self.input, "--output", self.directory / "invalid.mp4", "--factor", "4")
         self.assertNotEqual(r.returncode, 0)
+
+    def test_easy_plan(self):
+        r = cmd(HERE / "easy_editor.py", "plan", "--input", self.input, "--output", self.directory / "planned.mp4", "--preset", "short")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(json.loads(r.stdout)["preset"], "short")
+
+    def test_easy_render(self):
+        output = self.directory / "simple.mp4"
+        r = cmd(HERE / "easy_editor.py", "render", "--input", self.input, "--output", output, "--preset", "youtube", "--quality", "draft")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertTrue(output.is_file())
+
+    def test_easy_refuses_existing_file(self):
+        r = cmd(HERE / "easy_editor.py", "render", "--input", self.input, "--output", self.input)
+        self.assertNotEqual(r.returncode, 0)
+
+    def test_speech_keep_ranges(self):
+        spec = importlib.util.spec_from_file_location("speech_editor", HERE / "speech_editor.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.assertEqual(module.keep_ranges(3.0, [(0.5, 1.7)], 0.8, 0.3), [(0.0, 0.65), (1.55, 3.0)])
+        self.assertEqual(module.intervals("silence_start: 0.5\nsilence_end: 1.7 | silence_duration: 1.2", 3.0), [(0.5, 1.7)])
+
+    def test_speech_dry_run(self):
+        r = cmd(HERE / "speech_editor.py", "render", "--input", self.input, "--output", self.directory / "speech.mp4")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn('"dry_run": true', r.stdout)
+
+    def test_provider_adapters_no_network(self):
+        spec = importlib.util.spec_from_file_location("provider_gateway", HERE / "provider_gateway.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        previous = {key: os.environ.get(key) for key in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY")}
+        try:
+            for key in previous:
+                os.environ[key] = "test-placeholder-not-real"
+            for provider in ("openai", "anthropic", "gemini", "ollama"):
+                url, headers, payload = module.request_for(provider, "test-model", "Hello")
+                self.assertIn("model", url if provider == "gemini" else str(payload))
+                self.assertTrue(headers["Content-Type"] == "application/json")
+            self.assertEqual(module.parse_response("ollama", {"message": {"content": "ok"}}), "ok")
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
 
 if __name__ == "__main__":
     unittest.main()
