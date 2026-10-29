@@ -4,6 +4,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
+from provider_gateway import PROVIDERS
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -11,6 +12,11 @@ except ImportError as exc:
     raise SystemExit("Install optional dependency: python -m pip install 'mcp>=1.10,<2'") from exc
 
 mcp = FastMCP("universal-video-editor")
+
+@mcp.tool()
+def list_provider_types() -> dict:
+    """List supported text provider adapter types without revealing credentials."""
+    return {name: {"credential_environment_variable": config["env"]} for name, config in PROVIDERS.items()}
 
 @mcp.tool()
 def video_info(path: str) -> dict:
