@@ -1,38 +1,46 @@
 # Universal AI Video Editor
 
-A **model-neutral, local-first** video editing skill for terminal-capable AI agents using Codex, Claude Code, Gemini CLI, DeepSeek or other language models.
+An original, **local-first video editing toolkit** for terminal-capable AI agents. The same Python + FFmpeg commands can be used by Codex, Claude Code, Gemini CLI, and coding agents powered by DeepSeek or other models.
 
-## Implemented in v0.1
+## Implemented features
 
-- Inspect audio and video streams via FFprobe
-- Trim videos
-- Convert to vertical 9:16
-- Normalize audio loudness
-- Burn verified SRT subtitles into video
-- Add picture-in-picture footage
-- Preview planned FFmpeg commands with `--dry-run`
-- Preserve original footage and refuse overwriting outputs
+- FFprobe media inspection and stream information
+- Video trimming, 9:16 conversion, picture-in-picture
+- Loudness normalization and spectral noise filtering
+- Existing SRT subtitle burn-in
+- Video speed adjustments (0.5–2×), fade-in effects
+- Image thumbnail extraction at specified timestamps
+- Join two narrated clips (normalizes to 1280×720)
+- No-overwrite safety, dry-run command previews
+- Optional **read-only MCP server**: video information and trim planning
+- Automated smoke tests and GitHub Actions workflow for Windows, macOS and Linux
 
-**Not yet implemented:** automatic speech transcription, silence detection, AI B-roll generation, motion graphics, music generation, stock-media sourcing, and a universal MCP server. Browser-only chat products need a separate execution integration.
+**Not yet implemented:** transcription, automatic silence/filler removal, AI-generated B-roll, sophisticated motion graphics, automated clip ranking, voice isolation, or a complete GUI. No unsupported claim of superiority over other repositories is made.
 
 ## Requirements
 
-Python 3, FFmpeg and FFprobe on PATH. For all video editing functions, the FFmpeg build should include libx264 and the subtitles/libass filter.
+Python 3 and FFmpeg/FFprobe on PATH. Certain features need libx264, AAC, and the libass subtitles filter. Optional MCP support requires `mcp>=1.10,<2`. The basic editor has no cloud API or per-video quota.
 
-## Get started
+## Start here
 
-```bash
+```sh
 python scripts/video_editor.py doctor
 python scripts/video_editor.py probe --input input.mp4
-python scripts/video_editor.py trim --input input.mp4 --output cut.mp4 --start 5 --duration 30 --dry-run
+python scripts/video_editor.py trim --input input.mp4 --output trimmed.mp4 --start 2 --duration 30 --dry-run
+python scripts/advanced_editor.py thumbnail --input input.mp4 --output preview.jpg --time 10
+python -m unittest discover -s scripts -p 'test_*.py' -v
 ```
 
-Remove `--dry-run` after reviewing the command. Use a unique output filename. See [SKILL.md](SKILL.md) for all commands and [compatibility](references/compatibility.md) for host-specific limitations.
+See [SKILL.md](SKILL.md), [advanced workflows](references/advanced-workflows.md), [AI-host setup](references/agent-setup.md), and [compatibility](references/compatibility.md).
 
-## Security
+## Agent integration
 
-Review scripts before granting agent execution permission. Never publish footage, recordings, credentials, third-party media or model weights without the appropriate rights or authorization.
+The skill is *model-neutral*, not natively available in every AI chat application. Use a terminal-capable agent and point it to `SKILL.md`. For an MCP-capable host, configure the optional `scripts/mcp_server.py` process. In this initial adapter, MCP tools intentionally cannot execute edits.
 
-## License
+## Security and licenses
 
-MIT for the original project code and documentation. FFmpeg, codecs, models and all third-party content have separate license requirements.
+Original footage and any existing output are protected from overwrite. Review third-party tools and media licenses before distributing them. No videos are uploaded by this project. MIT license applies to this project's original code; media and external dependencies retain their separate licenses.
+
+## Benchmarks
+
+GitHub Actions provides a cross-platform correctness smoke-test baseline. Render-speed and resource benchmarks should report hardware, OS, FFmpeg version, exact input assets, quality checks and repeatable methodology before making comparative claims.
