@@ -31,3 +31,9 @@ python scripts/video_editor.py pip --input input.mp4 --overlay broll.mp4 --outpu
 Every rendering command accepts `--dry-run` and refuses overwriting files. The captions command needs an existing verified SRT. The tool does not bundle transcription, AI generation, stock footage, licensing, or cloud services. Optional plugins such as Kinocut may add functions but require independent review.
 
 Read [compatibility.md](references/compatibility.md) for differences among AI hosts and hardware limitations.
+
+## Additional original workflows
+
+For speed control, fades, noise filtering, thumbnail frames and joining two narrated clips, read [advanced-workflows.md](references/advanced-workflows.md) and use `scripts/advanced_editor.py`. Prefer presets that preserve the original speech and verify audio quality before delivery.
+
+For Codex, Claude Code, Gemini CLI, DeepSeek-based coding agents and other providers, read [agent-setup.md](references/agent-setup.md). A minimal optional MCP adapter is provided in `scripts/mcp_server.py`; it exposes **read-only** inspection and trim planning, not unrestricted video editing. Do not claim that all model providers natively support skills or MCP.
