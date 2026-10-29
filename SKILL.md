@@ -37,3 +37,9 @@ Read [compatibility.md](references/compatibility.md) for differences among AI ho
 For speed control, fades, noise filtering, thumbnail frames and joining two narrated clips, read [advanced-workflows.md](references/advanced-workflows.md) and use `scripts/advanced_editor.py`. Prefer presets that preserve the original speech and verify audio quality before delivery.
 
 For Codex, Claude Code, Gemini CLI, DeepSeek-based coding agents and other providers, read [agent-setup.md](references/agent-setup.md). A minimal optional MCP adapter is provided in `scripts/mcp_server.py`; it exposes **read-only** inspection and trim planning, not unrestricted video editing. Do not claim that all model providers natively support skills or MCP.
+
+For beginners requesting simple results, use the four approved presets in [beginner-workflows.md](references/beginner-workflows.md) with `scripts/easy_editor.py`. Show the preview plan, then render only after the user authorizes the edit. This is deterministic conversion and audio leveling, not an automatic creative editor.
+
+For speech-led raw footage, use [speech-workflows.md](references/speech-workflows.md) and `scripts/speech_editor.py` to inspect and compress long quiet pauses. This is an acoustic detector, not a semantic transcript editor. Never delete content on the assumption that quiet sections are meaningless.
+
+For model connections, consult [provider-setup.md](references/provider-setup.md). Use `scripts/provider_gateway.py` for text requests with explicitly supplied model IDs and environment-based API credentials. Its offline check does not prove provider connectivity; avoid sending user footage or secrets to a cloud provider without permission.
